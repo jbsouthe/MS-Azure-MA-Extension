@@ -20,11 +20,6 @@ public class LogicAppMonitor implements Monitor{
     }
 
     public List<Metric> getMetrics() {
-        // Get the Azure credentials
-        TokenCredential credential = new DefaultAzureCredentialBuilder().build();
-
-        // Create a Logic App client
-        LogicAppClient client = new LogicAppClientImpl(credential, AzureEnvironment.AZURE);
 
         // Get all Logic Apps in the subscription
         List<LogicApp> logicApps = client.listLogicApps();

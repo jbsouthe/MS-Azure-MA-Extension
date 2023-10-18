@@ -1,22 +1,22 @@
 
 <monitor>
-        <name>AppDynamics MA Self Monitor Extension</name>
+        <name>AppDynamics Azure Monitor Extension</name>
         <type>managed</type>
         <enabled>true</enabled>
-        <description>AppDynamics MA Self Monitor Extension</description>
-        <display-name>AppDynamics MA Self Monitor Extension</display-name>
+        <description>AppDynamics Azure Monitor Extension</description>
+        <display-name>AppDynamics Azure Monitor Extension</display-name>
         <monitor-configuration>
         </monitor-configuration>
         <monitor-run-task>
                 <task-arguments>
-                        <argument name="config-file" is-required="true" default-value="./default-config.yml" />
+                        <argument name="config-file" is-required="true" default-value="./default-config.properties" />
                 </task-arguments>
                 <type>java</type>
                 <execution-style>scheduled</execution-style>
                 <execution-timeout-in-secs>60</execution-timeout-in-secs>
                 <java-task>
                         <impl-class>
-                                SelfMonitoring
+                                MSAzureMonitoring
                         </impl-class>
                         <classpath>lib</classpath>
                         <load-jars-in-classpath-dirs>true</load-jars-in-classpath-dirs>

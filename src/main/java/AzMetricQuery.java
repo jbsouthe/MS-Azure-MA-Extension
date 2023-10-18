@@ -29,7 +29,7 @@ public class AzMetricQuery {
      * @param aggregations Metric Aggregations (i.e. AggregationType.AVERAGE, AggregationType.COUNT)
      *
      **/
-    public MetricsQueryResult getMetrics(TokenCredential tokenCredential,
+    public static MetricsQueryResult getMetrics(TokenCredential tokenCredential,
                                    String resourceId,
                                    List<String> metricsNames,
                                    String metricNamespace,

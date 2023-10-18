@@ -1,46 +1,82 @@
-import java.util.ArrayList;
-import java.util.List;
 import com.azure.core.credential.TokenCredential;
-import com.azure.core.management.AzureEnvironment;
-import com.azure.core.management.Region;
-import com.azure.identity.DefaultAzureCredentialBuilder;
-import com.azure.logicapps.LogicAppClient;
-import com.azure.logicapps.implementation.LogicAppClientImpl;
-import com.azure.logicapps.models.LogicApp;
-import com.azure.logicapps.models.LogicAppMetrics;
-import com.azure.logicapps.models.LogicAppMetricsListResult;
+import com.azure.core.http.rest.Response;
+import com.azure.core.util.Context;
+import com.azure.monitor.query.MetricsQueryClient;
+import com.azure.monitor.query.MetricsQueryClientBuilder;
+import com.azure.monitor.query.models.AggregationType;
+import com.azure.monitor.query.models.MetricResult;
+import com.azure.monitor.query.models.MetricsQueryOptions;
+import com.azure.monitor.query.models.MetricsQueryResult;
+import com.azure.monitor.query.models.QueryTimeInterval;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 
-public class LogicAppMonitor implements Monitor{
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
-    private LogicAppClient client;
+public class LogicAppMonitor {
+    private Configuration configuration;
+    private MetricsQueryClient client;
+    private String resourceId, namespace;
+    private List<String> metricNames = new ArrayList<>();
+    private QueryTimeInterval timeInterval;
+    private Duration granularity;
+    List<AggregationType> aggregations = new ArrayList<>();
 
-    public LogicAppMonitor( TokenCredential credential ) {
-        this.client = new LogicAppClientImpl(credential, AzureEnvironment.AZURE);
+    public LogicAppMonitor( Configuration configuration ) {
+        this.configuration = configuration;
+        this.client = new MetricsQueryClientBuilder()
+                .credential(configuration.getCredential())
+                .buildClient();
+        this.resourceId = String.format("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.CognitiveServices/accounts/srnagara-textanalytics");
+        this.namespace = "Microsoft.Logic/Workflows";
+        this.timeInterval = QueryTimeInterval.LAST_30_MINUTES;
+        this.granularity = Duration.ofMinutes(1);
+        this.aggregations.add(AggregationType.NONE);
     }
 
     public List<Metric> getMetrics() {
 
-        // Get all Logic Apps in the subscription
-        List<LogicApp> logicApps = client.listLogicApps();
+        Response<MetricsQueryResult> metricsResponse = client.queryResourceWithResponse(
+                        resourceId,
+                        this.metricNames,
+                        new MetricsQueryOptions()
+                            .setMetricNamespace(namespace)
+                            .setTimeInterval(timeInterval)
+                            .setGranularity(granularity)
+                            .setTop(100)
+                            .setAggregations(aggregations),
+                            Context.NONE);
 
         // Create a list to store the metrics for all Logic Apps
         List<Metric> metrics = new ArrayList<>();
 
-        // Iterate over all Logic Apps and get their metrics
-        for (LogicApp logicApp : logicApps) {
-            // Get the metrics for the current Logic App
-            LogicAppMetricsListResult logicAppMetrics = client.getLogicAppMetrics(logicApp.name(), Region.US_EAST2);
-
-            for (LogicAppMetrics metric : logicAppMetrics.value()) {
-                metrics.add( new Metric(
-                        String.format("Logic App|%s|%s",metric.name(), metric.metricName()),
-                        MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION,
-                        MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT,
-                        MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL,
-                        metric.metricValue()));
-        }
+        MetricsQueryResult metricsQueryResult = metricsResponse.getValue();
+        List<MetricResult> metricResults = metricsQueryResult.getMetrics();
+        metricResults.stream()
+               .forEach(metric -> {
+                   System.out.println(metric.getMetricName());
+                   System.out.println(metric.getId());
+                   System.out.println(metric.getResourceType());
+                   System.out.println(metric.getUnit());
+                   System.out.println(metric.getTimeSeries().size());
+                   System.out.println(metric.getTimeSeries().get(0).getValues().size());
+                   metric.getTimeSeries()
+                           .stream()
+                           .flatMap(ts -> ts.getValues().stream())
+                           .reduce((first, second) -> second)
+                           .ifPresent(last -> metrics.add(
+                               new Metric(
+                                   String.format("Logic App|%s|%s", metric.getDescription(), metric.getMetricName()),
+                                   MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION,
+                                   MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT,
+                                   MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL,
+                                   String.valueOf(last.getTotal()))
+                               )
+                           );
+               });
 
         return metrics;
     }
+
 }

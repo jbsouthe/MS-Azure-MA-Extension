@@ -30,9 +30,11 @@ public class MSAzureMonitoring extends AManagedMonitor {
         this.metricsPrinted=0;
 
         if( configuration.isLogicAppEnabled() ) {
-            LogicAppMonitor logicAppMonitor = new LogicAppMonitor(configuration.getCredential());
+
+            LogicAppMonitor logicAppMonitor = new LogicAppMonitor(configuration);
             for( Metric metric : logicAppMonitor.getMetrics() )
                 printMetric(metric);
+
         }
 
         if( taskOutputStringBuilder.length() == 0 ) {

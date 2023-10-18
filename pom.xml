@@ -19,8 +19,8 @@
     <dependencies>
         <dependency>
             <groupId>com.appdynamics</groupId>
-            <artifactId>machineagent</artifactId><!-- the machineagent.jar file is needed for compilation and linking, but NOT runtime, since it is provided -->
-            <version>21.9</version> <!-- i have this loaded in my local maven repo, you will need to load one as well, any recent version is fine -->
+            <artifactId>machineagent-repackaged</artifactId>
+            <version>4.0.5.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -46,11 +46,17 @@
             <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
-		<dependency>
-			<groupId>com.azure</groupId>
-			<artifactId>azure-mgmt-logic</artifactId>
-			<version>1.2.0</version>
-		</dependency>
+        <dependency>
+            <groupId>com.azure.resourcemanager</groupId>
+            <artifactId>azure-resourcemanager-logic</artifactId>
+            <version>1.0.0-beta.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.microsoft.azure/azure-mgmt-logic -->
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>azure-mgmt-logic</artifactId>
+            <version>1.2.0-beta</version>
+        </dependency>
 
 
     </dependencies>

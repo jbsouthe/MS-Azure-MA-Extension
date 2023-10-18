@@ -13,8 +13,8 @@ public class MSAzureMonitoring extends AManagedMonitor {
     private String metricPrefix = "Custom Metrics|Azure|"; //the MA IGNORES custom metrics unless they start with 'Custom Metrics|' so make it happen programmatically
     private int metricsPrinted;
 
-    public SelfMonitoring() { //this is called only on initial load
-        logger.info("Initializing Machine Agent Heap Self Monitoring Extension");
+    public MSAzureMonitoring() { //this is called only on initial load
+        logger.info("Initializing Machine Agent MS Azure Extension");
     }
 
     @Override
@@ -29,12 +29,16 @@ public class MSAzureMonitoring extends AManagedMonitor {
         long usedPercentage = (long) (Runtime.getRuntime().totalMemory() /(float)maxMemory  * 100); //convert the denominator to a float, we need the product to be a float
         if( usedPercentage < 0  || usedPercentage > 100 ) taskOutputStringBuilder.append(String.format("Error in used percentage calculation, this should never happen (0 >= %d <= 100)", usedPercentage));
         printMetric( "Used %", usedPercentage);
-        if( taskOutputStringBuilder.length() == 0 ) taskOutputStringBuilder.append(String.format("Machine Agent Self Monitor Ran With No Problems and printed %d Metrics", this.metricsPrinted));
+        if( taskOutputStringBuilder.length() == 0 ) taskOutputStringBuilder.append(String.format("Azure Monitor Ran With No Problems and printed %d Metrics", this.metricsPrinted));
         return new TaskOutput(taskOutputStringBuilder.toString());
     }
 
     public void printMetric( String name, Object value ) { //some helpful defaults for ma jvm heap
         this.printMetric(name, value, MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION, MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT, MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
+    }
+
+    public void printMetric( Metric metric ) {
+        this.printMetric(metric.name, metric.value, metric.aggregation, metric.timeRollup, metric.cluster);
     }
 
     public long convertBytesToMegaBytes( long bytes ) { return bytes/1024/1024; }

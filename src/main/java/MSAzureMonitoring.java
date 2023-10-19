@@ -22,7 +22,8 @@ public class MSAzureMonitoring extends AManagedMonitor {
     @Override
     public TaskOutput execute(Map<String, String> configMap, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
         try {
-            this.configuration = new Configuration(configMap.get("config-file"));
+            logger.info("config file: "+taskExecutionContext.getTaskDir() +"/"+ configMap.get("config-file") );
+            this.configuration = new Configuration(taskExecutionContext.getTaskDir() +"/"+ configMap.get("config-file"));
         } catch (IOException e) {
             throw new TaskExecutionException("Error in configuration file parsing: "+e);
         }

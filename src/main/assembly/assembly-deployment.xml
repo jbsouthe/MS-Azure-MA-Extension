@@ -16,7 +16,7 @@
                 <include>Changelog.md</include>
                 <include>LICENSE</include>
                 <include>NOTICE.txt</include>
-                <include>monitor.xml</include>
+                <include>default-config.properties</include>
             </includes>
             <lineEnding>unix</lineEnding>
             <fileMode>0644</fileMode>
@@ -25,7 +25,7 @@
             <directory>target/lib</directory>
             <outputDirectory>MSAzureMonitor/lib</outputDirectory>
             <includes>
-                <include>log4j-*.jar</include>
+                <include>*.jar</include>
             </includes>
         </fileSet>
     </fileSets>

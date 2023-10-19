@@ -20,7 +20,7 @@ public class Configuration {
         if(!configFile.exists()) throw new IOException("Configuration File Not Found: "+ configFileName);
         if(!configFile.canRead()) throw new IOException("Configuration File Exists But Not Readable! "+ configFile.getAbsolutePath());
         this.properties = new Properties();
-        FileInputStream inputStream = new FileInputStream("config.properties");
+        FileInputStream inputStream = new FileInputStream(this.configFile);
         properties.load(inputStream);
     }
 
